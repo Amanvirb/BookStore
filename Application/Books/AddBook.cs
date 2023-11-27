@@ -105,7 +105,7 @@ public class AddBook
                 _context.BookCopies.Add(bookNewCopies);
                 result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
-                if (!result) return Result<Unit>.Failure("Cannot add new Bookaaaaa");
+                if (!result) return Result<Unit>.Failure("Cannot add new Book");
 
             }
             else
