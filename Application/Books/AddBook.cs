@@ -131,8 +131,8 @@ public class AddBook
                 }
                 else
                 {
-                    List<BookCopiesHistory> bookCopiesHistories = new()
-                    {
+                    List<BookCopiesHistory> bookCopiesHistories =
+                    [
                         new BookCopiesHistory
                         {
                             DateTime = DateTime.Now,
@@ -140,7 +140,7 @@ public class AddBook
                             Copies = request.BookDetail.NumberOfCopies,
                             ActionType = ActionTypeEnum.Entered
                         }
-                    };
+                    ];
 
                     var bookNewCopies = new BookCopies
                     {
