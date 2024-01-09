@@ -21,7 +21,7 @@ public class BookList
             _mapper = mapper;
         }
 
-        public async Task<Result<PagedList<BookDetailDto>>> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<Result<PagedList<BookDetailDto>>> Handle(Query request, CancellationToken ct)
         {
             var query = _context.Books
                 .Include(x => x.SubCategory)
@@ -37,43 +37,7 @@ public class BookList
                 await PagedList<BookDetailDto>.CreateAsync(query, request.Params.PageNumber,
                 request.Params.PageSize)
             );
-
-           
-
-            //if (request.SearchTerm is null)
-            //{
-            //var searchTerm = request.Params.SearchTerm.ToLower();
-
-            //query = request.Params.OrderBy switch
-            //    {
-            //        "price" => query.OrderBy(p => p.Price).Where(p => p.Author.Contains(searchTerm) ||  p.Title.Contains(request.Params.SearchTerm)),
-            //        "priceDesc" => query.OrderByDescending(p => p.Price),
-            //        _ => query.OrderBy(p => p.Author).Where(p => p.Author.Contains(searchTerm) || p.Title.Contains(request.Params.SearchTerm)),
-            //    };
-
-            //query.Where(p => p.Title.Contains(request.Title));
-
-            //var dbBooks = await query.ToListAsync(cancellationToken: cancellationToken);
-
-            //var dbBooks = await PagedList<BookDetailDto>.ToPagedList(query, request.Params.PageNumber, request.Params.PageSize);
-
-            //Response.Headers.Add("Pagination", JsonSerializer.SerializeObject(dbBooks.MetaData));
-
-
-
-            //}
-            //else
-            //{
-            //    var searchTerm = request.SearchTerm.ToLower();
-
-            //    var searchedQuery = query.Where(p => p.Author.Contains(searchTerm));
-
-            //    var dbBooks = await searchedQuery.ToListAsync(cancellationToken: cancellationToken);
-            //    return Result<List<BookDetailDto>>.Success(dbBooks);
-            //}
-            //var searchTerm = request.SearchTerm.ToUpper().Trim();
         }
     }
 
 }
-    

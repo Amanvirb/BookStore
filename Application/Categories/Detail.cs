@@ -7,22 +7,16 @@ public class Detail
         public int Id { get; set; }
     }
 
-    public class Handler : IRequestHandler<Query, Result<CategoryDto>>
+    public class Handler(DataContext context, IMapper mapper) : IRequestHandler<Query, Result<CategoryDto>>
     {
-        private readonly DataContext _context;
-        private readonly IMapper _mapper;
+        private readonly DataContext _context = context;
+        private readonly IMapper _mapper = mapper;
 
-        public Handler(DataContext context, IMapper mapper)
-        {
-            _context = context;
-            _mapper = mapper;
-        }
-
-        public async Task<Result<CategoryDto>> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<Result<CategoryDto>> Handle(Query request, CancellationToken ct)
         {
             var category = await _context.Categories
                  .ProjectTo<CategoryDto>(_mapper.ConfigurationProvider)
-               .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken: cancellationToken);
+               .FirstOrDefaultAsync(x => x.Id == request.Id, ct);
 
             if (category == null) return null;
 

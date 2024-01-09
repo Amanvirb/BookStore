@@ -6,25 +6,18 @@ public class ShowBookDetail
     {
         public int Id { get; set; }
     }
-    public class Handler : IRequestHandler<Query, Result<BookDetailDto>>
+    public class Handler(DataContext context, IMapper mapper) : IRequestHandler<Query, Result<BookDetailDto>>
     {
-        private readonly DataContext _context;
-        private readonly IMapper _mapper;
+        private readonly DataContext _context = context;
+        private readonly IMapper _mapper = mapper;
 
-        public Handler(DataContext context, IMapper mapper)
-        {
-            _context = context;
-            _mapper = mapper;
-        }
-
-        public async Task<Result<BookDetailDto>> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<Result<BookDetailDto>> Handle(Query request, CancellationToken ct)
         {
             var bookDetail = await _context.Books
                 .Include(x=>x.BookCopies).ThenInclude(x=>x.BookCopiesHistory)
                 .Include(x => x.BookCopies).ThenInclude(x => x.Location)
                 .ProjectTo<BookDetailDto>(_mapper.ConfigurationProvider)
-                .FirstOrDefaultAsync(x =>x.Id==request.Id, 
-                cancellationToken: cancellationToken);
+                .FirstOrDefaultAsync(x =>x.Id==request.Id, ct);
 
             if (bookDetail is null) return null;
 

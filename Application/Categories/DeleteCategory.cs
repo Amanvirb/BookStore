@@ -7,25 +7,20 @@ public class DeleteCategory
         public int Id { get; set; }
     }
 
-    public class Handler : IRequestHandler<Command, Result<Unit>>
+    public class Handler(DataContext context) : IRequestHandler<Command, Result<Unit>>
     {
-        private readonly DataContext _context;
+        private readonly DataContext _context = context;
 
-        public Handler(DataContext context)
-        {
-            _context = context;
-        }
-
-        public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Result<Unit>> Handle(Command request, CancellationToken ct)
         {
             var category = await _context.Categories
-                .FirstOrDefaultAsync(c => c.Id == request.Id, cancellationToken: cancellationToken);
+                .FirstOrDefaultAsync(c => c.Id == request.Id, ct);
 
             if (category == null) return Result<Unit>.Failure("Can not delete because, Category does not exist");
 
             _context.Categories.Remove(category);
 
-            var result = await _context.SaveChangesAsync(cancellationToken) > 0;
+            var result = await _context.SaveChangesAsync(ct) > 0;
 
             if (!result) return Result<Unit>.Failure("Failed to delete category");
 

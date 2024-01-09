@@ -16,7 +16,7 @@ public class AddBook
             _context = context;
         }
 
-        public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Result<Unit>> Handle(Command request, CancellationToken ct)
         {
 
             var dbBook = await _context.Books
@@ -24,25 +24,21 @@ public class AddBook
                 .Include(b => b.BookCopies).ThenInclude(c => c.BookCopiesHistory)
                 .Include(b => b.Author)
                 .Include(b => b.Series)
-                .FirstOrDefaultAsync(x => x.ISBN == request.BookDetail.ISBN,
-                cancellationToken: cancellationToken);
+                .FirstOrDefaultAsync(x => x.ISBN == request.BookDetail.ISBN, ct);
 
             bool result;
 
             if (dbBook is null)
             {
-                var subCategory = await _context.SubCategories.FirstOrDefaultAsync(x => x.Name == request.BookDetail.SubCategoryName.ToUpper().Trim(),
-                cancellationToken: cancellationToken);
+                var subCategory = await _context.SubCategories.FirstOrDefaultAsync(x => x.Name == request.BookDetail.SubCategoryName.ToUpper().Trim(), ct);
 
                 if (subCategory is null) return Result<Unit>.Failure("SubCategory does not exists, Please create sub category First");
 
-                var location = await _context.Locations.FirstOrDefaultAsync(x => x.Name == request.BookDetail.Location.ToUpper().Trim(),
-                    cancellationToken: cancellationToken);
+                var location = await _context.Locations.FirstOrDefaultAsync(x => x.Name == request.BookDetail.Location.ToUpper().Trim(), ct);
 
                 if (location is null) return Result<Unit>.Failure("Location does not exists, Please create location first");
 
-                var author = await _context.Authors.FirstOrDefaultAsync(x => x.Name == request.BookDetail.Author,
-                    cancellationToken: cancellationToken);
+                var author = await _context.Authors.FirstOrDefaultAsync(x => x.Name == request.BookDetail.Author, ct);
 
                 if (author is null)
                 {
@@ -54,11 +50,10 @@ public class AddBook
                     };
 
                     _context.Authors.Add(author);
-                    await _context.SaveChangesAsync(cancellationToken);
+                    await _context.SaveChangesAsync(ct);
                 }
 
-                var series = await _context.Series.FirstOrDefaultAsync(x => x.Name == request.BookDetail.Series,
-                    cancellationToken: cancellationToken);
+                var series = await _context.Series.FirstOrDefaultAsync(x => x.Name == request.BookDetail.Series, ct);
 
                 if (series is null)
                 {
@@ -68,7 +63,7 @@ public class AddBook
                     };
 
                     _context.Series.Add(series);
-                    await _context.SaveChangesAsync(cancellationToken);
+                    await _context.SaveChangesAsync(ct);
                 }
 
                 var newBook = new BookDetail
@@ -82,10 +77,10 @@ public class AddBook
                 };
 
                 _context.Books.Add(newBook);
-                await _context.SaveChangesAsync(cancellationToken);
+                await _context.SaveChangesAsync(ct);
 
-                List<BookCopiesHistory> bookCopiesHistories = new()
-                {
+                List<BookCopiesHistory> bookCopiesHistories =
+                [
                     new BookCopiesHistory
                     {
                         DateTime = DateTime.Now,
@@ -93,7 +88,7 @@ public class AddBook
                         Copies = request.BookDetail.NumberOfCopies,
                         ActionType = ActionTypeEnum.Entered
                     }
-                };
+                ];
 
                 var bookNewCopies = new BookCopies
                 {
@@ -103,7 +98,7 @@ public class AddBook
                 };
 
                 _context.BookCopies.Add(bookNewCopies);
-                result = await _context.SaveChangesAsync(cancellationToken) > 0;
+                result = await _context.SaveChangesAsync(ct) > 0;
 
                 if (!result) return Result<Unit>.Failure("Cannot add new Book");
 
@@ -124,7 +119,7 @@ public class AddBook
                         ActionType = ActionTypeEnum.Entered
                     });
 
-                    result = await _context.SaveChangesAsync(cancellationToken) > 0;
+                    result = await _context.SaveChangesAsync(ct) > 0;
 
                     if (!result) return Result<Unit>.Failure("Cannot Modify copy");
 
@@ -150,7 +145,7 @@ public class AddBook
                     };
                     _context.BookCopies.Add(bookNewCopies);
 
-                    result = await _context.SaveChangesAsync(cancellationToken) > 0;
+                    result = await _context.SaveChangesAsync(ct) > 0;
 
                     if (!result) return Result<Unit>.Failure("Cannot add new Book on new location");
                 }
